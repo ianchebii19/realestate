@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import {residenyRoute} from './routes/residencyRoute.js'
+import {residencyRoute} from './routes/residencyRoute.js'
 import { userRoute } from './routes/userRoute.js';
 
 dotenv.config();
@@ -19,4 +19,4 @@ app.listen (PORT, ()=>{
 })
 
 app.use('/api/user', userRoute)
-app.use('/api/resideny', residenyRoute)
+app.use('/api/resideny', residencyRoute)
