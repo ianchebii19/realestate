@@ -7,53 +7,58 @@ import useProperties from "../../hooks/useProperties.jsx";
 import { useMutation } from "react-query";
 import { toast } from "react-toastify";
 import { createResidency } from "../../utils/api";
+
 const Facilities = ({
   prevStep,
-  propertyDetails,
+  propertyDetails = {
+    facilities: { bedrooms: 0, parkings: 0, bathrooms: 0 },
+  },
   setPropertyDetails,
   setOpened,
   setActiveStep,
 }) => {
+  // Form initialization
   const form = useForm({
     initialValues: {
-      bedrooms: propertyDetails.facilities.bedrooms,
-      parkings: propertyDetails.facilities.parkings,
-      bathrooms: propertyDetails.facilities.bathrooms,
+      bedrooms: propertyDetails.facilities.bedrooms || 0,
+      parkings: propertyDetails.facilities.parkings || 0,
+      bathrooms: propertyDetails.facilities.bathrooms || 0,
     },
     validate: {
-      bedrooms: (value) => (value < 1 ? "Must have atleast one room" : null),
+      bedrooms: (value) => (value < 1 ? "Must have at least one bedroom" : null),
       bathrooms: (value) =>
-        value < 1 ? "Must have atleast one bathroom" : null,
+        value < 1 ? "Must have at least one bathroom" : null,
+      parkings: (value) =>
+        value < 0 ? "Number of parkings cannot be negative" : null,
     },
   });
 
   const { bedrooms, parkings, bathrooms } = form.values;
 
-  const handleSubmit = () => {
-    const { hasErrors } = form.validate();
-    if (!hasErrors) {
-      setPropertyDetails((prev) => ({
-        ...prev,
-        facilities: { bedrooms, parkings, bathrooms },
-      }));
-      mutate();
-    }
-  };
-
-  // ==================== upload logic
+  // User and context
   const { user } = useAuth0();
   const {
     userDetails: { token },
   } = useContext(UserDetailContext);
   const { refetch: refetchProperties } = useProperties();
 
-  const {mutate, isLoading} = useMutation({
-    mutationFn: ()=> createResidency({
-        ...propertyDetails, facilities: {bedrooms, parkings , bathrooms},
-    }, token),
-    onError: ({ response }) => toast.error(response.data.message, {position: "bottom-right"}),
-    onSettled: ()=> {
-      toast.success("Added Successfully", {position: "bottom-right"});
+  // Mutation for creating residency
+  const { mutate, isLoading } = useMutation({
+    mutationFn: () =>
+      createResidency(
+        {
+          ...propertyDetails,
+          facilities: { bedrooms, parkings, bathrooms },
+        },
+        token
+      ),
+    onError: ({ response }) =>
+      toast.error(response?.data?.message || "An error occurred", {
+        position: "bottom-right",
+      }),
+    onSettled: () => {
+      toast.success("Added Successfully", { position: "bottom-right" });
+      // Reset form and state
       setPropertyDetails({
         title: "",
         description: "",
@@ -68,13 +73,24 @@ const Facilities = ({
           bathrooms: 0,
         },
         userEmail: user?.email,
-      })
-      setOpened(false)
-      setActiveStep(0)
-      refetchProperties()
-    }
+      });
+      setOpened(false);
+      setActiveStep(0);
+      refetchProperties();
+    },
+  });
 
-  })
+  // Form submit handler
+  const handleSubmit = () => {
+    const { hasErrors } = form.validate();
+    if (!hasErrors) {
+      setPropertyDetails((prev) => ({
+        ...prev,
+        facilities: { bedrooms, parkings, bathrooms },
+      }));
+      mutate();
+    }
+  };
 
   return (
     <Box maw="30%" mx="auto" my="sm">
@@ -86,19 +102,19 @@ const Facilities = ({
       >
         <NumberInput
           withAsterisk
-          label="No of Bedrooms"
-          min={0}
+          label="Number of Bedrooms"
+          min={1}
           {...form.getInputProps("bedrooms")}
         />
         <NumberInput
-          label="No of Parkings"
+          label="Number of Parkings"
           min={0}
           {...form.getInputProps("parkings")}
         />
         <NumberInput
           withAsterisk
-          label="No of Bathrooms"
-          min={0}
+          label="Number of Bathrooms"
+          min={1}
           {...form.getInputProps("bathrooms")}
         />
         <Group position="center" mt="xl">
@@ -106,7 +122,7 @@ const Facilities = ({
             Back
           </Button>
           <Button type="submit" color="green" disabled={isLoading}>
-            {isLoading ? "Submitting" : "Add Property"}
+            {isLoading ? "Submitting..." : "Add Property"}
           </Button>
         </Group>
       </form>

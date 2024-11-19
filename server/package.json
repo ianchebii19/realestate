@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "nodemon index.js",
-    "postinstall": "prisma generte"
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",

@@ -8,7 +8,9 @@ import { userRoute } from './routes/userRoute.js';
 dotenv.config();
 
 const app = express();
-
+app.use(cors({
+    origin: 'http://localhost:5173', // Allow your frontend
+  }));
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
@@ -19,4 +21,10 @@ app.listen (PORT, ()=>{
 })
 
 app.use('/api/user', userRoute)
-app.use('/api/resideny', residencyRoute)
+app.use('/api/residency', residencyRoute)
+
+
+
+/*
+
+*/
