@@ -56,8 +56,7 @@ const Contact = () => {
                     <span className="primaryText">Video Call</span>
                     <span className="secondaryText">+254720000000</span>
                   </div>
-                </div>
-                <div className="flexCenter button">Video Call now</div>
+                </div><div className="flexCenter button">Video Call now</div>
               </div>
 
               <div className="flexColCenter mode">
